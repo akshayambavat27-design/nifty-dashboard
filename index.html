@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <title>Participant wise Index Future Position</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { background:#000; color:#fff; font-family:Inter, sans-serif; margin:0; }
     header { padding:12px 20px; background:#000; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; }
@@ -11,11 +12,54 @@
     .main-container { display:grid; grid-template-columns:200px 1fr 200px; gap:10px; padding:10px 20px; }
     .ad-space { background:#000; border:1px dashed #333; color:#777; display:flex; justify-content:center; align-items:center; border-radius:8px; min-height:400px; }
     .center-container { display:flex; flex-direction:column; gap:10px; padding:0 10px; }
-    .chart-container, .snapshot { background:#000; border-radius:8px; padding:10px; border:1px solid #444; } /* subtle grey border */
+    .chart-container, .snapshot { background:#000; border-radius:8px; padding:10px; border:1px solid #444; }
     .snapshot { display:grid; grid-template-columns:repeat(4,1fr); text-align:center; }
     .snapshot .label { color:#94a3b8; font-size:14px; margin-bottom:4px; }
     .snapshot .value { font-weight:700; font-size:18px; }
-    @media(max-width:900px){ .main-container{grid-template-columns:1fr;} .snapshot{grid-template-columns:repeat(2,1fr);} }
+
+    /* Mobile-friendly tweaks */
+    canvas {
+      max-width: 100%;
+      height: auto !important;
+    }
+
+    header h1 {
+      font-size: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .main-container {
+        grid-template-columns: 1fr; /* stack everything */
+      }
+      .ad-space {
+        min-height: 100px; /* shrink ads */
+      }
+    }
+
+    @media (max-width: 600px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      header h1 {
+        font-size: 18px;
+      }
+      select {
+        font-size: 14px;
+        padding: 2px 6px;
+      }
+      .snapshot {
+        grid-template-columns: repeat(2, 1fr); /* two per row */
+        gap: 10px;
+      }
+      .snapshot .label {
+        font-size: 12px;
+      }
+      .snapshot .value {
+        font-size: 16px;
+      }
+    }
   </style>
 </head>
 <body>
