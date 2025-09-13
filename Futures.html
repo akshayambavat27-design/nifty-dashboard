@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Participant wise Index Future Position</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { background:#000; color:#fff; font-family:Inter, sans-serif; margin:0; }
+    header { padding:12px 20px; background:#000; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; }
+    select { background:#1f2937; color:#fff; border:1px solid #374151; padding:4px 8px; border-radius:4px; }
+    .main-container { display:grid; grid-template-columns:200px 1fr 200px; gap:10px; padding:10px 20px; }
+    .ad-space { background:#000; border:1px dashed #333; color:#777; display:flex; justify-content:center; align-items:center; border-radius:8px; min-height:400px; }
+    .center-container { display:flex; flex-direction:column; gap:10px; padding:0 10px; }
+    .chart-container, .snapshot { background:#000; border-radius:8px; padding:10px; border:1px solid #444; } /* subtle grey border */
+    .snapshot { display:grid; grid-template-columns:repeat(4,1fr); text-align:center; }
+    .snapshot .label { color:#94a3b8; font-size:14px; margin-bottom:4px; }
+    .snapshot .value { font-weight:700; font-size:18px; }
+    @media(max-width:900px){ .main-container{grid-template-columns:1fr;} .snapshot{grid-template-columns:repeat(2,1fr);} }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Participant wise Index Future Position</h1>
+    <div>
+      <label>Month:</label>
+      <select id="monthSelect"></select>  
+      <label>Year:</label>
+      <select id="yearSelect"></select>
+    </div>
+  </header>
+  <div class="main-container">
+    <div class="ad-space">Ad Space Left</div>
+    <div class="center-container">
+      <div class="chart-container"><canvas id="lineChart"></canvas></div>
+      <div class="snapshot">
+        <div><div class="label">Nifty</div><div class="value" id="niftyValue"></div></div>
+        <div><div class="label">FII</div><div class="value" id="fiiValue"></div></div>
+        <div><div class="label">PRO</div><div class="value" id="proValue"></div></div>
+        <div><div class="label">Clients</div><div class="value" id="clientsValue"></div></div>
+      </div>
+    </div>
+    <div class="ad-space">Ad Space Right</div>
+  </div>
+
+<script>
+const ctx = document.getElementById('lineChart').getContext('2d');
+let chart, dataset = [];
+const colors = { fii:"#3b82f6", dii:"#10b981", pro:"#f59e0b", clients:"#ef4444", nifty:"#a855f7" };
+
+// CSV export link from your Google Sheet
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEWDA_RwW8e8kI6PytgPH6b0DijP94QiACeWVmJNnmA9_qDCdegyj5d8VFG8gu47kpHS4wblayWeS7/pub?output=csv";
+
+// Fetch CSV and parse
+function fetchCSV() {
+  fetch(CSV_URL)
+    .then(res => res.text())
+    .then(text => {
+      const rows = text.trim().split("\n").slice(1); // skip header
+      dataset = rows.map(row => {
+        const [date,fii,dii,pro,clients,nifty] = row.split(",");
+        return {
+          date,
+          _dt: new Date(date),
+          fii: parseFloat(fii)||0,
+          dii: parseFloat(dii)||0,
+          pro: parseFloat(pro)||0,
+          clients: parseFloat(clients)||0,
+          nifty: parseFloat(nifty)||0
+        };
+      });
+      populateFilters();
+      updateChart();
+      updateSnapshot();
+    })
+    .catch(err => console.error("Error fetching CSV:", err));
+}
+
+function populateFilters() {
+  const years = [...new Set(dataset.map(d => d._dt.getFullYear()))];
+  const yearSelect = document.getElementById('yearSelect');
+  yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join("");
+
+  const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const monthSelect = document.getElementById('monthSelect');
+  monthSelect.innerHTML = monthNames.map((m,i) => `<option value="${i}">${m}</option>`).join("") + `<option value="all">All Months</option>`;
+
+  const latest = dataset[dataset.length-1];
+  if (latest && latest._dt) {
+    yearSelect.value = latest._dt.getFullYear();
+    monthSelect.value = latest._dt.getMonth();
+  }
+}
+
+function filterData(m, y) {
+  const yearNum = parseInt(y);
+  const monthNum = m === 'all' ? 'all' : parseInt(m);
+
+  return dataset.filter(d => {
+    const dt = d._dt;
+    return dt.getFullYear() === yearNum && (monthNum==='all' || dt.getMonth() === monthNum);
+  });
+}
+
+function updateChart() {
+  const month = document.getElementById('monthSelect').value;
+  const year = document.getElementById('yearSelect').value;
+  const filtered = filterData(month, year);
+
+  const labels = filtered.map(d => d.date);
+
+  const todayRadius = 6;
+  const defaultRadius = 3;
+
+  const datasets = [
+    { label:"FII", data: filtered.map(d=>d.fii), borderColor:colors.fii, yAxisID:"y", fill:false, pointRadius: filtered.map((_,i)=>i===filtered.length-1?todayRadius:defaultRadius), pointBackgroundColor: filtered.map((_,i)=>i===filtered.length-1?colors.fii:'#fff') },
+    { label:"DII", data: filtered.map(d=>d.dii), borderColor:colors.dii, yAxisID:"y", fill:false, pointRadius: filtered.map((_,i)=>i===filtered.length-1?todayRadius:defaultRadius), pointBackgroundColor: filtered.map((_,i)=>i===filtered.length-1?colors.dii:'#fff') },
+    { label:"PRO", data: filtered.map(d=>d.pro), borderColor:colors.pro, yAxisID:"y", fill:false, pointRadius: filtered.map((_,i)=>i===filtered.length-1?todayRadius:defaultRadius), pointBackgroundColor: filtered.map((_,i)=>i===filtered.length-1?colors.pro:'#fff') },
+    { label:"Clients", data: filtered.map(d=>d.clients), borderColor:colors.clients, yAxisID:"y", fill:false, pointRadius: filtered.map((_,i)=>i===filtered.length-1?todayRadius:defaultRadius), pointBackgroundColor: filtered.map((_,i)=>i===filtered.length-1?colors.clients:'#fff') },
+    { label:"Nifty", data: filtered.map(d=>d.nifty), borderColor:colors.nifty, yAxisID:"y1", borderDash:[5,5], fill:false, pointRadius: filtered.map((_,i)=>i===filtered.length-1?todayRadius:0), pointBackgroundColor: filtered.map((_,i)=>i===filtered.length-1?colors.nifty:'#fff') }
+  ];
+
+  if(chart) chart.destroy();
+  chart = new Chart(ctx,{
+    type:'line',
+    data:{labels,datasets},
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{
+          labels:{ color:'#fff', usePointStyle:true, pointStyle:'line', lineWidth:4, padding:20 }
+        }
+      },
+      scales:{
+        x:{ ticks:{color:'#aaa'}, grid:{color:'rgba(255,255,255,0.05)'}, title:{display:true,text:'Date',color:'#fff',font:{size:14}} },
+        y:{ position:'left', ticks:{color:'#aaa', callback:v=>v+'%'}, grid:{color:'rgba(255,255,255,0.05)'}, title:{display:true,text:'Long Percentage',color:'#fff',font:{size:14}} },
+        y1:{ position:'right', ticks:{color:'#c084fc'}, grid:{drawOnChartArea:false}, title:{display:true,text:'Nifty Price',color:'#c084fc',font:{size:14}} }
+      }
+    }
+  });
+}
+
+function updateSnapshot() {
+  const latest = dataset[dataset.length-1];
+  if(!latest) return;
+  document.getElementById('niftyValue').textContent = latest.nifty;
+  document.getElementById('fiiValue').textContent = latest.fii + '%';
+  document.getElementById('proValue').textContent = latest.pro + '%';
+  document.getElementById('clientsValue').textContent = latest.clients + '%';
+}
+
+document.getElementById('monthSelect').addEventListener('change', updateChart);
+document.getElementById('yearSelect').addEventListener('change', updateChart);
+
+fetchCSV();
+</script>
+</body>
+</html>
