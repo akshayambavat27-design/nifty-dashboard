@@ -17,9 +17,9 @@
       --border:   rgba(99,155,255,0.1);
       --borderHi: rgba(99,155,255,0.24);
       --fii:    #5b9cf6;
-      --dii:    #2dd4a0;
+      --dii:    #f472b6;
       --pro:    #f9c846;
-      --cli:    #fb7185;
+      --cli:    #f97316;
       --nifty:  #c77dff;
       --pos:    #2dd4a0;
       --neg:    #fb7185;
@@ -258,9 +258,9 @@
     }
     .badge-nifty { background:rgba(199,125,255,0.12); color:var(--nifty); }
     .badge-fii   { background:rgba(91,156,246,0.12);  color:var(--fii); }
-    .badge-dii   { background:rgba(45,212,160,0.12);  color:var(--dii); }
+    .badge-dii   { background:rgba(244,114,182,0.12);  color:var(--dii); }
     .badge-pro   { background:rgba(249,200,70,0.12);  color:var(--pro); }
-    .badge-cli   { background:rgba(251,113,133,0.12); color:var(--cli); }
+    .badge-cli   { background:rgba(249,115,22,0.12); color:var(--cli); }
 
     .card-val {
       font-size:1.85rem; font-weight:700; line-height:1;
@@ -574,7 +574,7 @@
 /* ═══════════════════════════════════════
    CONFIG
 ═══════════════════════════════════════ */
-const COLOR = { fii:'#5b9cf6', dii:'#2dd4a0', pro:'#f9c846', cli:'#fb7185', nifty:'#c77dff', grid:'rgba(255,255,255,0.04)', txt:'#526070' };
+const COLOR = { fii:'#5b9cf6', dii:'#f472b6', pro:'#f9c846', cli:'#f97316', nifty:'#c77dff', grid:'rgba(255,255,255,0.04)', txt:'#526070' };
 const CSV1 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEWDA_RwW8e8kI6PytgPH6b0DijP94QiACeWVmJNnmA9_qDCdegyj5d8VFG8gu47kpHS4wblayWeS7/pub?output=csv";
 const CSV2 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEWDA_RwW8e8kI6PytgPH6b0DijP94QiACeWVmJNnmA9_qDCdegyj5d8VFG8gu47kpHS4wblayWeS7/pub?gid=1454812490&single=true&output=csv";
 const CSV3 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEWDA_RwW8e8kI6PytgPH6b0DijP94QiACeWVmJNnmA9_qDCdegyj5d8VFG8gu47kpHS4wblayWeS7/pub?gid=609029555&single=true&output=csv";
@@ -658,7 +658,7 @@ function drawMainChart(filtered) {
     label, yAxisID:yID,
     data: filtered.map(d=>d[key]),
     borderColor: color,
-    backgroundColor: dash.length ? 'transparent' : hexToRgba(color, 0.08),
+    backgroundColor: dash.length ? 'transparent' : hexToRgba(color, 0.03),
     fill: !dash.length,
     tension:0.38, borderWidth:2, borderDash:dash,
     pointRadius:0, pointHoverRadius:5, pointHitRadius:14,
